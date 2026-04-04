@@ -1,0 +1,30 @@
+name: jellyfin_sync
+description: A tool to organize and download media directly into the Jellyfin library using yt-dlp.
+tools:
+  - name: check_folder_exists
+    description: "Checks for a specific folder OR lists existing folders if no name is provided. MUST be called before any download."
+    parameters:
+      type: object
+      properties:
+        folder_name:
+          type: string
+          description: "The folder name to search for. Leave blank to list all existing categories."
+    container:
+      command: ["/bin/bash", "~/.openclaw/skills/jellyfin_sync/downloader.sh", "search", "{{folder_name}}"]
+
+  - name: sync_media
+    description: "Downloads one or more URLs into a specific Jellyfin subfolder using yt-dlp. Never use wget or curl — this tool is the ONLY permitted download method."
+    parameters:
+      type: object
+      properties:
+        subfolder:
+          type: string
+          description: "The target folder name under /mnt/jellyfin_media (e.g., 'Hollywood', 'Bollywood', 'Shows')."
+        links:
+          type: string
+          description: "One or more URLs separated by spaces."
+      required:
+        - subfolder
+        - links
+    container:
+      command: ["/bin/bash", "~/.openclaw/skills/jellyfin_sync/downloader.sh", "{{subfolder}}", "{{links}}"]
