@@ -1,5 +1,20 @@
 name: media_sync
 description: Organize + download media into /mnt/jellyfin_media. Track progress.
+
+requires:
+  binaries:
+    - name: yt-dlp
+      install:
+        brew: yt-dlp
+        apt: |
+          curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /usr/local/bin/yt-dlp
+          chmod a+rx /usr/local/bin/yt-dlp
+mounts:
+  - path: /mnt/jellyfin_media
+    description: Media library root. Skill reads and writes here. Mount your media library.
+  - path: /tmp
+    description: Progress logs written here during downloads (media_sync_*.log).
+
 tools:
   - name: check_or_suggest_folder
     description: >
