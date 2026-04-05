@@ -1,30 +1,49 @@
-name: jellyfin_sync
-description: A tool to organize and download media directly into the Jellyfin library using yt-dlp.
+name: media_sync
+description: Organize + download media into /mnt/jellyfin_media. Track progress.
 tools:
-  - name: check_folder_exists
-    description: "Checks for a specific folder OR lists existing folders if no name is provided. MUST be called before any download."
+  - name: check_or_suggest_folder
+    description: >
+      Check folder exists under /mnt/jellyfin_media.
+      Returns: FOUND_EXACT (exists), FOUND_SIMILAR (close matches),
+      CLEAN (new, safe to create), NO_TARGET_PROVIDED (empty name, lists top-level).
+      Call before any download.
     parameters:
       type: object
       properties:
         folder_name:
           type: string
-          description: "The folder name to search for. Leave blank to list all existing categories."
+          description: "Subfolder to find. e.g. 'Hollywood' or 'Shows/Breaking Bad/Season 2'. Empty = list top-level."
+          default: ""
     container:
-      command: ["/bin/bash", "~/.openclaw/skills/jellyfin_sync/downloader.sh", "search", "{{folder_name}}"]
+      command: ["/bin/bash", "/home/$USER/.openclaw/skills/media_sync/check_or_suggest_folder.sh", "{{folder_name}}"]
 
-  - name: sync_media
-    description: "Downloads one or more URLs into a specific Jellyfin subfolder using yt-dlp. Never use wget or curl — this tool is the ONLY permitted download method."
+  - name: download_media
+    description: >
+      Download URLs into /mnt/jellyfin_media/<subfolder>. Creates folder if missing.
+      Logs progress to /tmp/media_sync_progress.log.
+      Only call after user confirms destination.
     parameters:
       type: object
       properties:
         subfolder:
           type: string
-          description: "The target folder name under /mnt/jellyfin_media (e.g., 'Hollywood', 'Bollywood', 'Shows')."
+          description: "Target path relative to /mnt/jellyfin_media. e.g. 'Hollywood' or 'Shows/Breaking Bad/Season 2'."
         links:
           type: string
-          description: "One or more URLs separated by spaces."
+          description: "URLs space-separated."
       required:
         - subfolder
         - links
     container:
-      command: ["/bin/bash", "~/.openclaw/skills/jellyfin_sync/downloader.sh", "{{subfolder}}", "{{links}}"]
+      command: ["/bin/bash", "/home/$USER/.openclaw/skills/media_sync/downloader.sh", "{{subfolder}}", "{{links}}"]
+
+  - name: check_download_status
+    description: >
+      Read progress of active/recent download session.
+      Returns per-file: percent, speed, ETA, size, errors.
+      Call when user asks for update. No params.
+    parameters:
+      type: object
+      properties: {}
+    container:
+      command: ["/bin/bash", "/home/$USER/.openclaw/skills/media_sync/check_download_status.sh"]
