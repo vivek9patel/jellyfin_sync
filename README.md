@@ -1,5 +1,9 @@
 # media_sync — OpenClaw skill
 
+```bash
+openclaw skills install media-sync
+```
+
 An [OpenClaw](https://openclaw.ai) skill that downloads media with `yt-dlp` into a fixed library root, checks folders before writing, waits for your confirmation, and exposes download progress on demand. Works with any layout you keep under that root (Plex, Jellyfin, plain folders, etc.).
 
 ---
